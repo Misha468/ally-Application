@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Image,
   ImageBackground,
@@ -7,12 +7,36 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-export default function TabLayout() {
+export default function IndexScreen() {
+  const [isVisible, setIsVisible] = useState(false);
+  const [pushedTitle, setPushedTitle] = useState("");
+  function ModalOpen(title: string) {
+    setIsVisible(true);
+    setPushedTitle(title);
+  }
+  function ModalClose() {
+    setIsVisible(false);
+  }
   return (
     <ImageBackground
       style={styles.background}
-      source={require("../../assets/images/background.png")}
+      source={require("../assets/images/background.png")}
     >
+      {isVisible && (
+        <TouchableOpacity
+          style={styles.modalWrapper}
+          activeOpacity={1}
+          onPress={ModalClose}
+        >
+          <TouchableOpacity
+            style={styles.form}
+            activeOpacity={1}
+            onPress={(e) => e.stopPropagation()}
+          >
+            <Text style={styles.formTitle}>{pushedTitle}</Text>
+          </TouchableOpacity>
+        </TouchableOpacity>
+      )}
       <View style={styles.header}>
         <Text style={styles.companyName}>ALLY</Text>
       </View>
@@ -22,31 +46,38 @@ export default function TabLayout() {
       <View style={styles.authentification}>
         <View style={styles.authTopPart}>
           <TouchableOpacity style={styles.signInButton}>
-            <Text style={styles.buttonText}>Войти</Text>
+            <Text style={styles.buttonText} onPress={() => ModalOpen("войти")}>
+              Войти
+            </Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconWrapper}>
             <Image
               style={styles.icon}
-              source={require("../../assets/images/signInIcons/yandex.png")}
+              source={require("../assets/images/signInIcons/yandex.png")}
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconWrapper}>
             <Image
               style={styles.bigIcon}
-              source={require("../../assets/images/signInIcons/google.png")}
+              source={require("../assets/images/signInIcons/google.png")}
             />
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconWrapper}>
             <Image
               style={styles.icon}
-              source={require("../../assets/images/signInIcons/gmail.png")}
+              source={require("../assets/images/signInIcons/gmail.png")}
             />
           </TouchableOpacity>
         </View>
         <Text style={styles.gappedText}>ИЛИ</Text>
         <View>
           <TouchableOpacity style={styles.signUpButton}>
-            <Text style={styles.buttonText}>Зарегистрироваться</Text>
+            <Text
+              style={styles.buttonText}
+              onPress={() => ModalOpen("зарегистрироваться")}
+            >
+              Зарегистрироваться
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -154,5 +185,31 @@ const styles = StyleSheet.create({
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
+  },
+  modalWrapper: {
+    backgroundColor: "rgba(255,255,255, 0.8)",
+    width: "100%",
+    height: "100%",
+    position: "absolute",
+    top: 0,
+    zIndex: 2,
+    left: 0,
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  form: {
+    width: "75%",
+    height: "40%",
+    borderRadius: 25,
+    backgroundColor: "#e6e6e3",
+    boxShadow: "0 0 25px rgba(0,0,0, 0.4)",
+  },
+  formTitle: {
+    textAlign: "center",
+    marginTop: 5,
+    fontSize: 18,
+    fontFamily: "InstSansSemiBold",
+    textTransform: "uppercase",
   },
 });
