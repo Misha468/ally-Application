@@ -1,27 +1,66 @@
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
+// React-native components
 import {
   Image,
   ImageBackground,
   StyleSheet,
   Text,
+  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
+// interfaces for Authentification
+interface SignInParams {
+  userName: string;
+  password: string;
+}
+interface SignUpParams {
+  userName: string;
+  email: string;
+  password: string;
+}
 export default function IndexScreen() {
+  const router = useRouter();
+  // Modal window consts
   const [isVisible, setIsVisible] = useState(false);
   const [pushedTitle, setPushedTitle] = useState("");
+  // Form text consts
+  const [userName, setUserName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  // Modal function
   function ModalOpen(title: string) {
     setIsVisible(true);
     setPushedTitle(title);
   }
   function ModalClose() {
-    setIsVisible(false);
+    if (userName || email || password) {
+    } else {
+      setIsVisible(false);
+    }
   }
+  // Authentification functions
+  function SignInRequest({ userName, password }: SignInParams) {
+    console.log(userName, password);
+
+    setUserName("");
+    setPassword("");
+    router.replace("/(tabs)/home");
+  }
+  function SignUpRequest({ userName, email, password }: SignUpParams) {
+    console.log(userName, email, password);
+    setUserName("");
+    setEmail("");
+    setPassword("");
+  }
+  // Screen render
   return (
     <ImageBackground
       style={styles.background}
       source={require("../assets/images/background.png")}
     >
+      {/* Modal window */}
       {isVisible && (
         <TouchableOpacity
           style={styles.modalWrapper}
@@ -34,9 +73,64 @@ export default function IndexScreen() {
             onPress={(e) => e.stopPropagation()}
           >
             <Text style={styles.formTitle}>{pushedTitle}</Text>
+            {pushedTitle === "войти" ? (
+              <View style={styles.innerInFormWrapper}>
+                <TextInput
+                  style={styles.inputs}
+                  value={userName}
+                  onChangeText={setUserName}
+                  placeholder="Логин..."
+                  placeholderTextColor={"#727070"}
+                />
+                <TextInput
+                  style={styles.inputs}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Пароль..."
+                  placeholderTextColor={"#727070"}
+                />
+                <TouchableOpacity
+                  style={styles.enterInButton}
+                  onPress={() => SignInRequest({ userName, password })}
+                >
+                  <Text style={styles.enterInText}>ОК</Text>
+                </TouchableOpacity>
+              </View>
+            ) : (
+              <View style={styles.innerUpFormWrapper}>
+                <TextInput
+                  style={styles.inputs}
+                  value={userName}
+                  onChangeText={setUserName}
+                  placeholder="Имя пользователя..."
+                  placeholderTextColor={"#727070"}
+                />
+                <TextInput
+                  style={styles.inputs}
+                  value={email}
+                  onChangeText={setEmail}
+                  placeholder="Email..."
+                  placeholderTextColor={"#727070"}
+                />
+                <TextInput
+                  style={styles.inputs}
+                  value={password}
+                  onChangeText={setPassword}
+                  placeholder="Пароль..."
+                  placeholderTextColor={"#727070"}
+                />
+                <TouchableOpacity
+                  style={styles.enterInButton}
+                  onPress={() => SignUpRequest({ userName, email, password })}
+                >
+                  <Text style={styles.enterInText}>ОК</Text>
+                </TouchableOpacity>
+              </View>
+            )}
           </TouchableOpacity>
         </TouchableOpacity>
       )}
+      {/* Modal window */}
       <View style={styles.header}>
         <Text style={styles.companyName}>ALLY</Text>
       </View>
@@ -45,10 +139,11 @@ export default function IndexScreen() {
       </View>
       <View style={styles.authentification}>
         <View style={styles.authTopPart}>
-          <TouchableOpacity style={styles.signInButton}>
-            <Text style={styles.buttonText} onPress={() => ModalOpen("войти")}>
-              Войти
-            </Text>
+          <TouchableOpacity
+            style={styles.signInButton}
+            onPress={() => ModalOpen("войти")}
+          >
+            <Text style={styles.buttonText}>Войти</Text>
           </TouchableOpacity>
           <TouchableOpacity style={styles.iconWrapper}>
             <Image
@@ -71,13 +166,11 @@ export default function IndexScreen() {
         </View>
         <Text style={styles.gappedText}>ИЛИ</Text>
         <View>
-          <TouchableOpacity style={styles.signUpButton}>
-            <Text
-              style={styles.buttonText}
-              onPress={() => ModalOpen("зарегистрироваться")}
-            >
-              Зарегистрироваться
-            </Text>
+          <TouchableOpacity
+            style={styles.signUpButton}
+            onPress={() => ModalOpen("зарегистрироваться")}
+          >
+            <Text style={styles.buttonText}>Зарегистрироваться</Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -204,12 +297,55 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: "#e6e6e3",
     boxShadow: "0 0 25px rgba(0,0,0, 0.4)",
+    display: "flex",
+    gap: 10,
+    padding: 5,
+    alignItems: "center",
+    justifyContent: "center",
   },
   formTitle: {
     textAlign: "center",
     marginTop: 5,
-    fontSize: 18,
-    fontFamily: "InstSansSemiBold",
+    fontSize: 22,
+    fontFamily: "InstSansMed",
     textTransform: "uppercase",
+  },
+  inputs: {
+    width: "90%",
+    height: 50,
+    borderRadius: 15,
+    backgroundColor: "#d9d9d9",
+    paddingLeft: 15,
+    fontFamily: "InstSansMed",
+  },
+  enterInButton: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    width: 75,
+    height: 35,
+    borderRadius: 7,
+    boxShadow: "0 0 25px rgba(0,0,0,0.4)",
+  },
+  enterInText: {
+    fontSize: 24,
+    color: "#727070",
+    fontFamily: "InstSansMed",
+  },
+  innerInFormWrapper: {
+    padding: 10,
+    display: "flex",
+    justifyContent: "space-around",
+    alignItems: "center",
+    width: "90%",
+    height: "70%",
+  },
+  innerUpFormWrapper: {
+    padding: 10,
+    display: "flex",
+    justifyContent: "space-around",
+    alignItems: "center",
+    width: "90%",
+    height: "80%",
   },
 });

@@ -14,12 +14,16 @@ export default function RootLayout() {
       SplashScreen.hideAsync();
     }
   }, [loaded]);
+  if (!loaded) {
+    SplashScreen.preventAutoHideAsync();
+  }
 
   return (
     <View style={styles.background}>
       <Stack screenOptions={{ headerShown: false }}>
         <Stack.Screen name="index" />
-        <Stack.Screen name="(auth)" />
+        <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="profile" />
       </Stack>
     </View>
   );
