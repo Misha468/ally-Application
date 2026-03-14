@@ -1,9 +1,12 @@
+import { SignInUser, SignUpUser } from "@/firebase/authService";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 // React-native components
 import {
   Image,
   ImageBackground,
+  Platform,
   StyleSheet,
   Text,
   TextInput,
@@ -25,12 +28,51 @@ export default function IndexScreen() {
   // Modal window consts
   const [isVisible, setIsVisible] = useState(false);
   const [pushedTitle, setPushedTitle] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
   // Form text consts
   const [userName, setUserName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  // Errors && hints
+  const [userNameError, setUserNameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [formError, setFormError] = useState("");
+  // Validation functions
+  const validateUserName = (name: string): boolean => {
+    if (!name || name.trim().length < 3) {
+      setUserNameError("Имя пользователя должно содержать минимум 3 символа");
+      return false;
+    }
+    setUserNameError("");
+    return true;
+  };
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email || !emailRegex.test(email)) {
+      setEmailError("Введите корректный email");
+      return false;
+    }
+    setEmailError("");
+    return true;
+  };
+  const validatePassword = (password: string): boolean => {
+    if (!password || password.length < 6) {
+      setPasswordError("Пароль должен содержать минимум 6 символов");
+      return false;
+    }
+    setPasswordError("");
+    return true;
+  };
   // Modal function
   function ModalOpen(title: string) {
+    setUserName("");
+    setEmail("");
+    setPassword("");
+    setUserNameError("");
+    setEmailError("");
+    setPasswordError("");
+    setFormError("");
     setIsVisible(true);
     setPushedTitle(title);
   }
@@ -38,22 +80,75 @@ export default function IndexScreen() {
     if (userName || email || password) {
     } else {
       setIsVisible(false);
+      setUserName("");
+      setEmail("");
+      setPassword("");
+      setUserNameError("");
+      setEmailError("");
+      setPasswordError("");
+      setFormError("");
     }
   }
-  // Authentification functions
-  function SignInRequest({ userName, password }: SignInParams) {
-    console.log(userName, password);
+  // AuthSuccess
+  const handleAuthSuccess = async (token: string, user: any) => {
+    try {
+      await AsyncStorage.setItem("userToken", token);
+      await AsyncStorage.setItem("userData", JSON.stringify(user));
+      ModalClose();
+      router.replace("/(tabs)/home");
+    } catch (error) {
+      console.error("Error saving auth data:", error);
+      setFormError("Ошибка при сохранении данных");
+    }
+  };
+  // SignIn function
+  async function SignInRequest({ userName, password }: SignInParams) {
+    const isUserNameValid = validateUserName(userName);
+    const isPasswordValid = validatePassword(password);
+    if (!isUserNameValid || !isPasswordValid) {
+      return;
+    }
+    setIsLoading(true);
+    setFormError("");
+    try {
+      const result = await SignInUser({ userName, password });
+      if (result.success && result.token) {
+        await handleAuthSuccess(result.token, result.user);
+      } else {
+        setFormError(result.error || "Ошибка при входе");
+      }
+    } catch (error) {
+      setFormError("Произошла ошибка при входе");
+      console.error("SignIn error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
+  // SignUp function
+  async function SignUpRequest({ userName, email, password }: SignUpParams) {
+    const isUserNameValid = validateUserName(userName);
+    const isEmailValid = validateEmail(email);
+    const isPasswordValid = validatePassword(password);
+    if (!isUserNameValid || !isEmailValid || !isPasswordValid) {
+      return;
+    }
+    setIsLoading(true);
+    setFormError("");
+    try {
+      const result = await SignUpUser({ userName, email, password });
+      if (result.success && result.token) {
+        await handleAuthSuccess(result.token, result.user);
+      } else {
+        setFormError(result.error || "Ошибка при регистрации");
+      }
+    } catch (error) {
+      setFormError("Произошла ошибка при регистрации");
+      console.error("SignUp error:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
-    setUserName("");
-    setPassword("");
-    router.replace("/(tabs)/home");
-  }
-  function SignUpRequest({ userName, email, password }: SignUpParams) {
-    console.log(userName, email, password);
-    setUserName("");
-    setEmail("");
-    setPassword("");
-  }
   // Screen render
   return (
     <ImageBackground
@@ -82,13 +177,21 @@ export default function IndexScreen() {
                   placeholder="Логин..."
                   placeholderTextColor={"#727070"}
                 />
+                {userNameError && (
+                  <Text style={styles.errorText}>{userNameError}</Text>
+                )}
                 <TextInput
                   style={styles.inputs}
                   value={password}
                   onChangeText={setPassword}
+                  secureTextEntry={true}
                   placeholder="Пароль..."
                   placeholderTextColor={"#727070"}
                 />
+                {passwordError && (
+                  <Text style={styles.errorText}>{passwordError}</Text>
+                )}
+                {formError && <Text style={styles.errorText}>{formError}</Text>}
                 <TouchableOpacity
                   style={styles.enterInButton}
                   onPress={() => SignInRequest({ userName, password })}
@@ -105,6 +208,9 @@ export default function IndexScreen() {
                   placeholder="Имя пользователя..."
                   placeholderTextColor={"#727070"}
                 />
+                {userNameError && (
+                  <Text style={styles.errorText}>{userNameError}</Text>
+                )}
                 <TextInput
                   style={styles.inputs}
                   value={email}
@@ -112,13 +218,21 @@ export default function IndexScreen() {
                   placeholder="Email..."
                   placeholderTextColor={"#727070"}
                 />
+                {emailError && (
+                  <Text style={styles.errorText}>{emailError}</Text>
+                )}
                 <TextInput
                   style={styles.inputs}
                   value={password}
                   onChangeText={setPassword}
                   placeholder="Пароль..."
                   placeholderTextColor={"#727070"}
+                  secureTextEntry={true}
                 />
+                {passwordError && (
+                  <Text style={styles.errorText}>{passwordError}</Text>
+                )}
+                {formError && <Text style={styles.errorText}>{formError}</Text>}
                 <TouchableOpacity
                   style={styles.enterInButton}
                   onPress={() => SignUpRequest({ userName, email, password })}
@@ -190,12 +304,10 @@ const styles = StyleSheet.create({
   background: {
     width: "100%",
     height: "100%",
-    display: "flex",
   },
   header: {
     width: "100%",
     height: 150,
-    display: "flex",
     alignItems: "flex-end",
     paddingRight: 25,
     justifyContent: "center",
@@ -207,9 +319,7 @@ const styles = StyleSheet.create({
   },
   titleWrapper: {
     width: "100%",
-    flexBasis: "auto",
-    flexGrow: 1,
-    flexShrink: 1,
+    flex: 1,
   },
   textTitle: {
     fontSize: 26,
@@ -222,12 +332,21 @@ const styles = StyleSheet.create({
   authentification: {
     width: "90%",
     height: 200,
-    marginHorizontal: "auto",
+    alignSelf: "center",
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
-    boxShadow: "0px 0px 30px rgba(0,0,0,0.2)",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.25,
+        shadowRadius: 30,
+      },
+      android: {
+        elevation: 10,
+      },
+    }),
     backgroundColor: "#e6e6e3",
-    display: "flex",
     gap: 15,
     alignItems: "center",
     justifyContent: "center",
@@ -241,7 +360,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     width: 150,
     height: 45,
-    display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -250,7 +368,6 @@ const styles = StyleSheet.create({
     borderRadius: 25,
     width: 310,
     height: 45,
-    display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -260,24 +377,29 @@ const styles = StyleSheet.create({
   },
   authTopPart: {
     width: 310,
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
-  signInIcons: {
-    display: "flex",
-    flexDirection: "row",
-    gap: 5,
-  },
   iconWrapper: {
     width: 45,
     height: 45,
-    borderRadius: "100%",
+    borderRadius: 999,
     backgroundColor: "#f0f0f0",
-    display: "flex",
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+      },
+      android: {
+        elevation: 2,
+      },
+    }),
   },
   modalWrapper: {
     backgroundColor: "rgba(255,255,255, 0.8)",
@@ -287,7 +409,6 @@ const styles = StyleSheet.create({
     top: 0,
     zIndex: 2,
     left: 0,
-    display: "flex",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -296,8 +417,17 @@ const styles = StyleSheet.create({
     height: "40%",
     borderRadius: 25,
     backgroundColor: "#e6e6e3",
-    boxShadow: "0 0 25px rgba(0,0,0, 0.4)",
-    display: "flex",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.4,
+        shadowRadius: 25,
+      },
+      android: {
+        elevation: 8,
+      },
+    }),
     gap: 10,
     padding: 5,
     alignItems: "center",
@@ -315,17 +445,39 @@ const styles = StyleSheet.create({
     height: 50,
     borderRadius: 15,
     backgroundColor: "#d9d9d9",
-    paddingLeft: 15,
+    paddingHorizontal: 15,
     fontFamily: "InstSansMed",
+    ...Platform.select({
+      ios: {
+        borderWidth: 0,
+      },
+      android: {
+        borderWidth: 0,
+      },
+    }),
+  },
+  inputError: {
+    borderWidth: 1,
+    borderColor: "#ff0000",
   },
   enterInButton: {
-    display: "flex",
     alignItems: "center",
     justifyContent: "center",
     width: 75,
     height: 35,
     borderRadius: 7,
-    boxShadow: "0 0 25px rgba(0,0,0,0.4)",
+    backgroundColor: "#f0f0f0",
+    ...Platform.select({
+      ios: {
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.2,
+        shadowRadius: 3,
+      },
+      android: {
+        elevation: 3,
+      },
+    }),
   },
   enterInText: {
     fontSize: 24,
@@ -334,7 +486,6 @@ const styles = StyleSheet.create({
   },
   innerInFormWrapper: {
     padding: 10,
-    display: "flex",
     justifyContent: "space-around",
     alignItems: "center",
     width: "90%",
@@ -342,10 +493,36 @@ const styles = StyleSheet.create({
   },
   innerUpFormWrapper: {
     padding: 10,
-    display: "flex",
     justifyContent: "space-around",
     alignItems: "center",
     width: "90%",
     height: "80%",
+  },
+  errorText: {
+    fontSize: 12,
+    color: "#ff0000",
+    fontFamily: "InstSansMed",
+  },
+  formErrorText: {
+    fontSize: 14,
+    color: "#ff0000",
+    fontFamily: "InstSansMed",
+    textAlign: "center",
+    marginVertical: 5,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+  },
+  loaderText: {
+    marginTop: 10,
+    fontSize: 16,
+    color: "#727070",
+    fontFamily: "InstSansMed",
+  },
+  disabledButton: {
+    opacity: 0.5,
   },
 });

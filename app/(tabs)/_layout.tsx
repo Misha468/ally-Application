@@ -96,6 +96,12 @@ export default function TabsLayout() {
           ),
         }}
       />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }
@@ -115,7 +121,7 @@ const styles = StyleSheet.create({
     width: 200,
     height: 200,
     resizeMode: "contain",
-    borderRadius: "100%",
+    borderRadius: 999,
     marginBottom: 45,
   },
   iconWrapper: {
