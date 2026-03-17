@@ -102,6 +102,30 @@ export default function TabsLayout() {
           href: null,
         }}
       />
+      <Tabs.Screen
+        name="profileSet"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="languageSet"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="about"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="become"
+        options={{
+          href: null,
+        }}
+      />
     </Tabs>
   );
 }

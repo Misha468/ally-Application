@@ -16,6 +16,9 @@ interface UserData {
   email: string;
   password: string;
   role: string;
+  tokens: number;
+  subscrType: string;
+  subscrDateEnd: Date;
 }
 // Token gen fuction
 function GenerateToken(): string {
@@ -49,6 +52,9 @@ export async function SignUpUser(userData: SignUpProps) {
       email: email,
       password: password,
       role: "user",
+      subscrType: "base",
+      subscrdateEnd: new Date().toISOString(),
+      tokens: 10,
     };
     await set(ref(database, `users/${userId}`), newUser);
     const token = GenerateToken();
