@@ -148,7 +148,6 @@ export default function IndexScreen() {
       setIsLoading(false);
     }
   }
-
   // Screen render
   return (
     <ImageBackground
@@ -447,14 +446,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#d9d9d9",
     paddingHorizontal: 15,
     fontFamily: "InstSansMed",
-    ...Platform.select({
-      ios: {
-        borderWidth: 0,
-      },
-      android: {
-        borderWidth: 0,
-      },
-    }),
+    borderWidth: 0,
   },
   inputError: {
     borderWidth: 1,

@@ -19,6 +19,8 @@ interface UserData {
   tokens: number;
   subscrType: string;
   subscrDateEnd: Date;
+  profileStatus: string;
+  subscribes: object;
 }
 // Token gen fuction
 function GenerateToken(): string {
@@ -55,6 +57,8 @@ export async function SignUpUser(userData: SignUpProps) {
       subscrType: "base",
       subscrdateEnd: new Date().toISOString(),
       tokens: 10,
+      profileStatus: "user",
+      subscribes: [],
     };
     await set(ref(database, `users/${userId}`), newUser);
     const token = GenerateToken();

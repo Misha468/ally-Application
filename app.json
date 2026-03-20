@@ -25,7 +25,8 @@
         "image": "./assets/images/splash-icon.png",
         "resizeMode": "contain",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.anonymous.allyApplication"
     },
     "web": {
       "output": "static",
@@ -46,6 +47,12 @@
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "1f05b390-95b3-4b0f-81ba-9bc9942c5a9f"
+      }
     }
   }
 }

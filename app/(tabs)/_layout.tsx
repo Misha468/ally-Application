@@ -102,12 +102,12 @@ export default function TabsLayout() {
           href: null,
         }}
       />
-      <Tabs.Screen
+      {/* <Tabs.Screen
         name="profileSet"
         options={{
           href: null,
         }}
-      />
+      /> */}
       <Tabs.Screen
         name="languageSet"
         options={{
@@ -123,6 +123,31 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="become"
         options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="inDev"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="creator"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="creatorProfile"
+        options={{
+          href: null,
+        }}
+      />
+      <Tabs.Screen
+        name="buyTokens"
+        options={{
+          tabBarStyle: { display: "none" },
           href: null,
         }}
       />

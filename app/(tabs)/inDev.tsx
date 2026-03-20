@@ -1,12 +1,14 @@
 import { ImageBackground, StyleSheet, Text } from "react-native";
+import Footer from "../components/Footer";
 
-export default function SearchScreen() {
+export default function inDevScreen() {
   return (
     <ImageBackground
       style={styles.wrapper}
       source={require("../../assets/images/background.png")}
     >
       <Text style={styles.text}>Экран в разработке</Text>
+      <Footer />
     </ImageBackground>
   );
 }

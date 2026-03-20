@@ -12,8 +12,8 @@ import {
 } from "react-native";
 import Footer from "../components/Footer";
 interface userDataProps {
-  role: string;
   userName: string;
+  role: string;
   tokens: number;
   subscrType: string;
   subscrdateEnd: string;
@@ -21,7 +21,6 @@ interface userDataProps {
 export default function ProfileScreen() {
   const router = useRouter();
   // UseStates
-  const [pageName, setPageName] = useState("");
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<userDataProps>({
     role: "",
@@ -40,7 +39,6 @@ export default function ProfileScreen() {
         if (data && isMounted) {
           const parsedData: userDataProps = JSON.parse(data);
           setUserData(parsedData);
-          console.log(userData);
         } else {
           console.log("Данные не найдены");
         }
@@ -77,7 +75,7 @@ export default function ProfileScreen() {
         router.replace("/shop");
         break;
       case "profile":
-        router.replace("/profileSet");
+        router.replace("/inDev");
         break;
       case "language":
         router.replace("/languageSet");
@@ -87,6 +85,9 @@ export default function ProfileScreen() {
         break;
       case "become":
         router.replace("/become");
+        break;
+      case "creator":
+        router.replace("/creator");
         break;
       default:
         break;
@@ -111,14 +112,14 @@ export default function ProfileScreen() {
           />
         </View>
       </View>
-      <View style={styles.centralPart}>
-        <View style={styles.userNameWrapper}>
+      <View style={styles.centralPart} pointerEvents="box-none">
+        <View style={styles.userNameWrapper} pointerEvents="box-none">
           <Image
             style={styles.userNameWrapperBackground}
             source={require("../../assets/images/iconBackgrounds/userNameBackground.png")}
           />
           {/* ProfileInfo */}
-          <View style={styles.profileInfoWrapper}>
+          <View style={styles.profileInfoWrapper} pointerEvents="auto">
             <View style={styles.valueWrapper}>
               <Text style={styles.miniTitle}>ник</Text>
               <View style={styles.userNameValueWrapper}>
@@ -180,7 +181,7 @@ export default function ProfileScreen() {
                   </View>
                 </View>
               )}
-              <View style={styles.buttonWrapperBottomPart}>
+              <View style={styles.buttonWrapperBottomPart} pointerEvents="auto">
                 <TouchableOpacity
                   style={styles.shopButton}
                   onPress={() => pageOpener("subscrtiption")}
@@ -215,14 +216,24 @@ export default function ProfileScreen() {
             <Text style={styles.buttonText}>О приложении</Text>
             <Text style={styles.buttonArrow}>&gt;</Text>
           </TouchableOpacity>
-          {/* Become a creator */}
-          <TouchableOpacity
-            style={styles.button}
-            onPress={() => pageOpener("become")}
-          >
-            <Text style={styles.buttonText}>Стать креатором</Text>
-            <Text style={styles.buttonArrow}>&gt;</Text>
-          </TouchableOpacity>
+          {/* Become a creator / Creator profile */}
+          {userData.role === "creator" ? (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => pageOpener("creator")}
+            >
+              <Text style={styles.buttonText}>Профиль креатора</Text>
+              <Text style={styles.buttonArrow}>&gt;</Text>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              style={styles.button}
+              onPress={() => pageOpener("become")}
+            >
+              <Text style={styles.buttonText}>Стать креатором</Text>
+              <Text style={styles.buttonArrow}>&gt;</Text>
+            </TouchableOpacity>
+          )}
           {/* End buttons */}
         </View>
       </View>
@@ -327,7 +338,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   buttonText: {
-    fontSize: 16,
+    fontSize: 14,
     textTransform: "uppercase",
     fontFamily: "InstSansMed",
     color: "#727070",
@@ -349,6 +360,8 @@ const styles = StyleSheet.create({
     backgroundColor: "#d9d9d9",
     paddingHorizontal: 15,
     borderRadius: 15,
+    zIndex: 99,
+    elevation: 99,
   },
   profileButtons: {
     display: "flex",
@@ -436,5 +449,7 @@ const styles = StyleSheet.create({
     width: "100%",
     display: "flex",
     alignItems: "flex-end",
+    elevation: 99,
+    zIndex: 99,
   },
 });
